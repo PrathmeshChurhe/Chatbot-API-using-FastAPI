@@ -9,29 +9,22 @@ from langchain.llms.base import LLM
 import time
 import uvicorn
 
-#import uvicorn-
-
-# Constants
-MODEL_NAME = 'mellogpt.Q3_K_S.gguf'
-MODEL_PATH = 'D:\\python\\final_mental\\chatbot\\mellogpt.Q3_K_S.gguf'
+MODEL_NAME = 'GGUF model used(mellogpt.Q3_K_S.gguf)'
+MODEL_PATH = 'local_model_path'
 KNOWLEDGE_BASE_FILE = "mentalhealth.csv"
 NUM_THREADS = 8
 
-# Initialize FastAPI app
 app = FastAPI()
 
-# Load Knowledge Base
 def load_knowledge_base():
     df = pd.read_csv(KNOWLEDGE_BASE_FILE)
     return dict(zip(df['Questions'].str.lower(), df['Answers']))
 
 knowledge_base = load_knowledge_base()
 
-# Query data model
 class Query(BaseModel):
     query: str
 
-# Custom LLM Class
 class CustomLLM(LLM):
     model_name = MODEL_NAME
 
@@ -55,24 +48,21 @@ class CustomLLM(LLM):
 
 llm = CustomLLM()
 
-# Add CORS middleware
 origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:5173",
     "https://localhost:5173",
-    # Add other origins as needed
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allows all origins
+    allow_origins=origins,  
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],  
+    allow_headers=["*"], 
 )
 
-# API Endpoint for querying the chatbot
 @app.post('/query')
 async def handle_query(query: Query):
     user_input = query.query.lower()
@@ -96,6 +86,5 @@ async def handle_query(query: Query):
 
     return JSONResponse(content=response)
 
-# Running the FastAPI app with Uvicorn
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
